@@ -55,7 +55,6 @@
             border-top-left-radius: 20px; border-top-right-radius: 20px; 
             transform: translateY(0);
         }
-        /* Estado del carrito minimizado */
         .seccion-pago.minimizado {
             transform: translateY(calc(100% - 40px));
         }
@@ -138,7 +137,7 @@
             </div>
 
             <label class="upload-area" id="label-comprobante">
-                <input type="file" id="comprobante" accept="image/*" required style="display: none;" onchange="mostrarNombreArchivo()">
+                <input type="file" id="comprobante" accept="image/*" style="display: none;" onchange="mostrarNombreArchivo()">
                 <span id="texto-comprobante" style="font-weight: bold; color: var(--primary); font-size: 0.95rem;">📸 Toca para subir Capture de Pago</span>
             </label>
             
@@ -172,7 +171,6 @@
         let carrito = [], subtotal = 0, deliveryActivo = null, tasaActiva = 0, productosCache = [];
         let temporizadorCarrito, compraConfirmada = false;
         
-        // VARIABLE MAESTRA DE 7 MINUTOS EXACTOS
         const TIEMPO_RESERVA_MS = 7 * 60 * 1000; 
 
         const TEL_TOKEN = "8639095393:AAEIqGWDeWT3wVFOEpTX_Yh0PWnagtFDsWs";
@@ -180,31 +178,25 @@
         const sndAdd = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
         const sndDel = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
 
-        // --- SISTEMA DE MINIMIZADO DEL CARRITO ---
         window.toggleCarrito = () => {
             const carritoSec = document.getElementById('carrito-seccion');
             const icono = document.getElementById('icono-carrito');
-            // Al hacer clic manual, la animación es rápida (0.4s)
             carritoSec.style.transition = 'transform 0.4s ease-in-out';
             carritoSec.classList.toggle('minimizado');
             icono.innerText = carritoSec.classList.contains('minimizado') ? '🔼' : '🔽';
         };
 
-        // EVENTO: A los 20 segundos de abrir la página, el carrito sube lento
         setTimeout(() => {
             const carritoSec = document.getElementById('carrito-seccion');
             const icono = document.getElementById('icono-carrito');
             if (carritoSec.classList.contains('minimizado')) {
-                // Sube usando la transición de 4 segundos
                 carritoSec.classList.remove('minimizado');
                 icono.innerText = '🔽';
-                
-                // Después de los 4 segundos, volvemos a poner la velocidad rápida por si el cliente lo toca
                 setTimeout(() => {
                     carritoSec.style.transition = 'transform 0.4s ease-in-out';
                 }, 4000);
             }
-        }, 20000); // 20 segundos
+        }, 20000); 
 
         window.toggleEntrega = () => {
             const dirInput = document.getElementById('direccion');
@@ -229,7 +221,6 @@
             }
         };
 
-        // --- LIMPIEZA A LOS 7 MINUTOS EXACTOS ---
         window.vaciarCarritoPorTiempo = () => {
             if (carrito.length === 0 || compraConfirmada) return;
             carrito = []; subtotal = 0; cerrarModal(); actualizarUI(); renderCatalogo();
@@ -352,7 +343,6 @@
                 actualizarUI(); 
                 reiniciarReloj(); 
 
-                // Si al agregar el carrito está minimizado, lo subimos para que el usuario vea su producto
                 const carritoSec = document.getElementById('carrito-seccion');
                 if (carritoSec.classList.contains('minimizado')) {
                     carritoSec.style.transition = 'transform 0.4s ease-in-out';
@@ -430,23 +420,29 @@
         document.getElementById('formulario-pago').onsubmit = async (e) => {
             e.preventDefault();
             clearTimeout(temporizadorCarrito); 
+
+            const fileInput = document.getElementById('comprobante');
+            
+            // VALIDACIÓN MANUAL PARA PREVENIR EL BLOQUEO DEL NAVEGADOR
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert("⚠️ ¡Falta el comprobante! Por favor, toca el cuadro con la cámara para subir la foto de tu pago.");
+                reiniciarReloj(); 
+                return;
+            }
             
             const btnFinal = document.getElementById('btn-submit-final');
             const textoOriginal = btnFinal.innerText;
             btnFinal.disabled = true;
 
             let base64Texto = "N/A";
-            const fileInput = document.getElementById('comprobante');
-            if (fileInput.files.length > 0) {
-                btnFinal.innerText = "⚙️ Procesando imagen...";
-                try {
-                    base64Texto = await comprimirABase64(fileInput.files[0]);
-                } catch (err) {
-                    alert("Error al procesar la foto.");
-                    btnFinal.disabled = false; btnFinal.innerText = textoOriginal; 
-                    reiniciarReloj(); 
-                    return;
-                }
+            btnFinal.innerText = "⚙️ Procesando imagen...";
+            try {
+                base64Texto = await comprimirABase64(fileInput.files[0]);
+            } catch (err) {
+                alert("Error al procesar la foto.");
+                btnFinal.disabled = false; btnFinal.innerText = textoOriginal; 
+                reiniciarReloj(); 
+                return;
             }
 
             btnFinal.innerText = "🔄 Facturando pedido...";
