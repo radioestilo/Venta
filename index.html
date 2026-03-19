@@ -3,111 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sitio en Construcción</title>
+    <title>Sitio en Construcción - Video</title>
     <style>
-        /* Estilos base */
+        /* Estilos base del fondo de la aplicación */
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
             font-family: 'Segoe UI', sans-serif;
+            /* Fondo de la aplicación conservado */
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: #ffffff;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
             overflow: hidden;
         }
 
-        .contenedor {
-            padding: 20px;
-            z-index: 1;
+        /* Contenedor principal para el video vertical */
+        .video-wrapper {
+            position: relative;
+            /* Definimos relación de aspecto 9:16 vertical */
+            height: 90vh; /* Ocupa el 90% de la altura de la pantalla */
+            aspect-ratio: 9 / 16;
+            background-color: #000; /* Fondo negro mientras carga el video */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end; /* Empuja el contenido (texto) hacia abajo */
         }
 
+        /* El elemento de video en sí */
+        .vertical-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Cubre todo el contenedor sin deformarse */
+            z-index: 1; /* Capa base */
+        }
+
+        /* Degradado Transparente Superior para mezcla */
+        .video-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 25%; /* Ajusta la altura del degradado */
+            /* Degradado desde el color del fondo (#1e3c72 aprox) a transparente */
+            background: linear-gradient(to bottom, #1e3c72 0%, rgba(30, 60, 114, 0) 100%);
+            z-index: 2; /* Sobre el video */
+            pointer-events: none; /* No interfiere con clics en el video */
+        }
+
+        /* Degradado Transparente Inferior para mezcla */
+        .video-wrapper::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 35%; /* Más alto para la zona de texto */
+            /* Degradado desde el color del fondo (#2a5298 aprox) a transparente */
+            background: linear-gradient(to top, #2a5298 0%, rgba(42, 82, 152, 0) 100%);
+            z-index: 2; /* Sobre el video */
+            pointer-events: none;
+        }
+
+        /* Contenedor del texto posicionado en la parte baja */
+        .contenedor-texto {
+            padding: 20px;
+            z-index: 3; /* Sobre los degradados y el video */
+            width: 100%;
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+
+        /* Estilos conservados del h1, ajustando tamaño */
         h1 {
-            font-size: 6vw;
+            /* font-size: 6vw; /* vw puede ser muy grande en vertical */
+            font-size: 2.5rem; /* Tamaño relativo más controlado */
             font-weight: 900;
             margin: 0;
             text-transform: uppercase;
-            letter-spacing: 4px;
-            text-shadow: 3px 5px 15px rgba(0, 0, 0, 0.4);
+            letter-spacing: 3px;
+            text-shadow: 2px 3px 10px rgba(0, 0, 0, 0.7); /* Sombra más fuerte sobre video */
             animation: aparecer 1.5s ease-out;
         }
 
-        /* Botón Elegante */
-        .btn-escuchar {
-            margin-top: 40px;
-            padding: 15px 35px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid #ffffff;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .btn-escuchar:hover {
-            background: #ffffff;
-            color: #1e3c72;
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(255,255,255,0.3);
-        }
-
-        /* Animación de entrada */
+        /* Animación de entrada conservada */
         @keyframes aparecer {
-            from { opacity: 0; transform: translateY(-20px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        @media (max-width: 768px) {
-            h1 { font-size: 10vw; }
-            .btn-escuchar { font-size: 1rem; padding: 12px 25px; }
+        /* Ajustes para pantallas muy pequeñas */
+        @media (max-width: 480px) {
+            .video-wrapper {
+                height: 100vh; /* Full screen en móviles muy pequeños */
+                width: 100vw;
+                aspect-ratio: auto;
+            }
+            h1 { font-size: 2rem; letter-spacing: 2px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="contenedor">
-        <h1>¡ESTAMOS TRABAJANDO!</h1>
+    <div class="video-wrapper">
         
-        <button id="botonPublicidad" class="btn-escuchar" onclick="reproducirAudio()">
-            🔊 ESCUCHAR PUBLICIDAD
-        </button>
+        <video autoplay loop muted playsinline class="vertical-video">
+            <source src="video.mp4" type="video/mp4">
+            Tu navegador no soporta el video.
+        </video>
+
+        <div class="contenedor-texto">
+            <h1>¡ESTAMOS TRABAJANDO!</h1>
+        </div>
     </div>
-
-    <audio id="miAudio" loop>
-        <source src="publicidad.wav" type="audio/mpeg">
-        Tu navegador no soporta el audio.
-    </audio>
-
-    <script>
-        function reproducirAudio() {
-            const audio = document.getElementById('miAudio');
-            const boton = document.getElementById('botonPublicidad');
-
-            audio.play().then(() => {
-                // Si el navegador permite la reproducción, actualizamos el botón
-                boton.innerHTML = "🎶 REPRODUCIENDO...";
-                boton.style.opacity = "0.7";
-            }).catch(error => {
-                // Si el navegador bloquea el autoplay, el usuario tendrá que hacer clic manual
-                console.log("Autoplay bloqueado. Esperando interacción del usuario.");
-            });
-        }
-
-        // ESTA LÍNEA HACE QUE EL BOTÓN SE "PRESIONE" SOLO AL CARGAR
-        window.onload = function() {
-            reproducirAudio();
-        };
-    </script>
 
 </body>
 </html>
