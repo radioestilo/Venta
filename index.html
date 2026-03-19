@@ -11,7 +11,7 @@
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: #ffffff;
             display: flex; justify-content: center; align-items: center;
-            overflow: hidden; cursor: pointer; /* Indica que se puede hacer clic */
+            overflow: hidden; cursor: pointer;
         }
 
         .video-wrapper {
@@ -58,9 +58,20 @@
             text-transform: uppercase;
             letter-spacing: 3px;
             text-shadow: 2px 3px 15px rgba(0, 0, 0, 0.9);
+            transition: all 0.5s ease;
         }
 
-        /* Aviso discreto que desaparece al sonar */
+        /* EFECTO ESPECIAL PARA LAS LETRAS */
+        .efecto-especial {
+            animation: destello 0.8s ease-out;
+        }
+
+        @keyframes destello {
+            0% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.2); filter: brightness(2); text-shadow: 0 0 20px #fff; }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
+
         #aviso {
             position: absolute; top: 10px; font-size: 0.8rem; opacity: 0.6; z-index: 10;
         }
@@ -68,37 +79,59 @@
 </head>
 <body onclick="activarTodo()">
 
-    <div id="aviso">Toca cualquier parte para activar sonido 🔊</div>
+    <div id="aviso">Toca para activar sonido 🔊</div>
 
     <div class="video-wrapper">
-        <video id="vid" autoplay loop muted playsinline class="vertical-video">
-            <source src="tu_video.mp4" type="video/mp4">
+        <video id="vid" autoplay muted playsinline class="vertical-video">
+            <source src="video1.mp4" type="video/mp4">
         </video>
 
         <div class="contenedor-texto">
-            <h1>¡ESTAMOS TRABAJANDO!</h1>
+            <h1 id="titulo">¡ESTAMOS TRABAJANDO!</h1>
         </div>
     </div>
 
     <script>
         const video = document.getElementById('vid');
         const aviso = document.getElementById('aviso');
+        const titulo = document.getElementById('titulo');
 
-        // Intento de reproducción automática con sonido al cargar
+        // 1. LISTA DE VIDEOS
+        const listaVideos = [
+            'video1.mp4', 
+            'video2.mp4', 
+            'video3.mp4'
+        ];
+        let indiceActual = 0;
+
+        // Función para cambiar de video con efecto
+        function cambiarSiguienteVideo() {
+            indiceActual = (indiceActual + 1) % listaVideos.length;
+            
+            // Aplicar efecto visual a las letras
+            titulo.classList.remove('efecto-especial');
+            void titulo.offsetWidth; // Reiniciar animación
+            titulo.classList.add('efecto-especial');
+
+            // Cambiar fuente y reproducir
+            video.src = listaVideos[indiceActual];
+            video.play();
+        }
+
+        // Detectar cuando el video actual termina
+        video.onended = cambiarSiguienteVideo;
+
         window.addEventListener('load', () => {
-            video.muted = false;
-            video.play().catch(error => {
-                console.log("El navegador bloqueó el audio automático. Esperando clic.");
-                video.muted = true; // Lo dejamos mudo para que al menos se vea el video
+            video.play().catch(() => {
+                video.muted = true;
                 video.play();
             });
         });
 
-        // Función que se activa al hacer clic en CUALQUIER PARTE de la pantalla
         function activarTodo() {
             video.muted = false;
             video.play();
-            aviso.style.display = 'none'; // Quitamos el aviso
+            aviso.style.display = 'none';
         }
     </script>
 
