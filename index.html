@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sitio en Construcción</title>
     <style>
-        /* (El CSS se mantiene igual que en el código anterior) */
+        /* Estilos base */
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: #ffffff;
             display: flex;
@@ -18,13 +18,12 @@
             justify-content: center;
             align-items: center;
             text-align: center;
+            overflow: hidden;
         }
 
         .contenedor {
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            z-index: 1;
         }
 
         h1 {
@@ -34,33 +33,47 @@
             text-transform: uppercase;
             letter-spacing: 4px;
             text-shadow: 3px 5px 15px rgba(0, 0, 0, 0.4);
+            animation: aparecer 1.5s ease-out;
         }
 
-        p {
-            font-size: 1.5rem;
-            margin-top: 20px;
-            color: #d1d8e0;
-            font-weight: 300;
+        /* Botón Elegante */
+        .btn-escuchar {
+            margin-top: 40px;
+            padding: 15px 35px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #ffffff;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        .cargando {
-            margin-top: 50px;
-            border: 6px solid rgba(255, 255, 255, 0.2);
-            border-top: 6px solid #ffffff;
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: girar 1s linear infinite;
+        .btn-escuchar:hover {
+            background: #ffffff;
+            color: #1e3c72;
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255,255,255,0.3);
         }
 
-        @keyframes girar {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .btn-escuchar:active {
+            transform: scale(0.95);
+        }
+
+        /* Animación de entrada */
+        @keyframes aparecer {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @media (max-width: 768px) {
-            h1 { font-size: 12vw; }
-            p { font-size: 1.2rem; }
+            h1 { font-size: 10vw; }
+            .btn-escuchar { font-size: 1rem; padding: 12px 25px; }
         }
     </style>
 </head>
@@ -68,14 +81,30 @@
 
     <div class="contenedor">
         <h1>¡ESTAMOS TRABAJANDO!</h1>
-        <p>Nuestro sitio web está en mantenimiento. Vuelve pronto.</p>
-        <div class="cargando"></div>
+        
+        <button class="btn-escuchar" onclick="reproducirAudio()">
+            🔊 ESCUCHAR PUBLICIDAD
+        </button>
     </div>
 
-    <audio autoplay loop>
-        <source src="musica.mp3" type="audio/mpeg">
-        Tu navegador no soporta el elemento de audio.
+    <audio id="miAudio" loop>
+        <source src="publicidad.wav" type="audio/wav">
+        Tu navegador no soporta el audio.
     </audio>
+
+    <script>
+        function reproducirAudio() {
+            const audio = document.getElementById('miAudio');
+            audio.play().catch(error => {
+                console.log("El navegador bloqueó el audio inicialmente:", error);
+            });
+            
+            // Opcional: Cambiar el texto del botón al hacer clic
+            const boton = document.querySelector('.btn-escuchar');
+            boton.innerHTML = "🎶 REPRODUCIENDO...";
+            boton.style.opacity = "0.7";
+        }
+    </script>
 
 </body>
 </html>
