@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sitio en Construcción</title>
+    <title>Sitio en Construcción - Playlist</title>
     <style>
         body, html {
             margin: 0; padding: 0; height: 100%;
@@ -11,7 +11,7 @@
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: #ffffff;
             display: flex; justify-content: center; align-items: center;
-            overflow: hidden; cursor: pointer; /* Indica que se puede hacer clic */
+            overflow: hidden; cursor: pointer;
         }
 
         .video-wrapper {
@@ -30,7 +30,7 @@
             z-index: 1;
         }
 
-        /* Degradados para mezcla */
+        /* Degradados para mezcla con el fondo */
         .video-wrapper::before {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 25%;
             background: linear-gradient(to bottom, #1e3c72 0%, rgba(30, 60, 114, 0) 100%);
@@ -60,7 +60,6 @@
             text-shadow: 2px 3px 15px rgba(0, 0, 0, 0.9);
         }
 
-        /* Aviso discreto que desaparece al sonar */
         #aviso {
             position: absolute; top: 10px; font-size: 0.8rem; opacity: 0.6; z-index: 10;
         }
@@ -68,11 +67,11 @@
 </head>
 <body onclick="activarTodo()">
 
-    <div id="aviso">Toca cualquier parte para activar sonido 🔊</div>
+    <div id="aviso">Toca para activar sonido 🔊</div>
 
     <div class="video-wrapper">
-        <video id="vid" autoplay loop muted playsinline class="vertical-video">
-            <source src="video.mp4" type="video/mp4">
+        <video id="vid" autoplay muted playsinline class="vertical-video">
+            <source src="" id="videoSource" type="video/mp4">
         </video>
 
         <div class="contenedor-texto">
@@ -81,24 +80,44 @@
     </div>
 
     <script>
-        const video = document.getElementById('vid');
+        // 1. LISTA DE VIDEOS: Agrega aquí todos los que quieras
+        const playlist = [
+            'video1.mp4',
+            'video2.mp4',
+            'video3.mp4',
+            'video4.mp4'
+        ];
+
+        let currentIndex = 0;
+        const videoPlayer = document.getElementById('vid');
         const aviso = document.getElementById('aviso');
 
-        // Intento de reproducción automática con sonido al cargar
-        window.addEventListener('load', () => {
-            video.muted = false;
-            video.play().catch(error => {
-                console.log("El navegador bloqueó el audio automático. Esperando clic.");
-                video.muted = true; // Lo dejamos mudo para que al menos se vea el video
-                video.play();
-            });
-        });
+        // Función para cargar y reproducir el siguiente video
+        function cargarVideo(index) {
+            videoPlayer.src = playlist[index];
+            videoPlayer.load();
+            videoPlayer.play().catch(e => console.log("Esperando interacción..."));
+        }
 
-        // Función que se activa al hacer clic en CUALQUIER PARTE de la pantalla
+        // Al cargar la página, ponemos el primero
+        window.onload = () => {
+            cargarVideo(currentIndex);
+        };
+
+        // EVENTO CLAVE: Cuando termina un video, pasa al siguiente
+        videoPlayer.onended = () => {
+            currentIndex++; // Sumamos 1 al índice
+            if (currentIndex >= playlist.length) {
+                currentIndex = 0; // Si llegamos al final, volvemos al primero
+            }
+            cargarVideo(currentIndex);
+        };
+
+        // Activa el sonido al tocar la pantalla
         function activarTodo() {
-            video.muted = false;
-            video.play();
-            aviso.style.display = 'none'; // Quitamos el aviso
+            videoPlayer.muted = false;
+            videoPlayer.play();
+            aviso.style.display = 'none';
         }
     </script>
 
