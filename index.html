@@ -61,10 +61,6 @@
             box-shadow: 0 6px 20px rgba(255,255,255,0.3);
         }
 
-        .btn-escuchar:active {
-            transform: scale(0.95);
-        }
-
         /* Animación de entrada */
         @keyframes aparecer {
             from { opacity: 0; transform: translateY(-20px); }
@@ -82,28 +78,35 @@
     <div class="contenedor">
         <h1>¡ESTAMOS TRABAJANDO!</h1>
         
-        <button class="btn-escuchar" onclick="reproducirAudio()">
+        <button id="botonPublicidad" class="btn-escuchar" onclick="reproducirAudio()">
             🔊 ESCUCHAR PUBLICIDAD
         </button>
     </div>
 
     <audio id="miAudio" loop>
-        <source src="publicidad.wav" type="audio/wav">
+        <source src="publicidad.wav" type="audio/mpeg">
         Tu navegador no soporta el audio.
     </audio>
 
     <script>
         function reproducirAudio() {
             const audio = document.getElementById('miAudio');
-            audio.play().catch(error => {
-                console.log("El navegador bloqueó el audio inicialmente:", error);
+            const boton = document.getElementById('botonPublicidad');
+
+            audio.play().then(() => {
+                // Si el navegador permite la reproducción, actualizamos el botón
+                boton.innerHTML = "🎶 REPRODUCIENDO...";
+                boton.style.opacity = "0.7";
+            }).catch(error => {
+                // Si el navegador bloquea el autoplay, el usuario tendrá que hacer clic manual
+                console.log("Autoplay bloqueado. Esperando interacción del usuario.");
             });
-            
-            // Opcional: Cambiar el texto del botón al hacer clic
-            const boton = document.querySelector('.btn-escuchar');
-            boton.innerHTML = "🎶 REPRODUCIENDO...";
-            boton.style.opacity = "0.7";
         }
+
+        // ESTA LÍNEA HACE QUE EL BOTÓN SE "PRESIONE" SOLO AL CARGAR
+        window.onload = function() {
+            reproducirAudio();
+        };
     </script>
 
 </body>
