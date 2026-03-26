@@ -75,14 +75,17 @@
         .opciones-entrega label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
         .opciones-entrega input[type="radio"] { width: 18px; height: 18px; margin: 0; cursor: pointer; accent-color: var(--success); }
 
+        /* AVISO DE RETORNO BDV */
+        #aviso-retorno { display: none; background: #e1f5fe; color: #01579b; padding: 12px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 15px; border: 1px solid #b3e5fc; text-align: center; line-height: 1.4; }
+
         .datos-pago { 
             margin: 15px 0; padding: 0; background: white; 
             border: 2px solid #ccc; border-radius: 12px; text-align: center; 
             overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: all 0.3s ease; 
         }
         .datos-pago:hover { box-shadow: 0 6px 15px rgba(0,0,0,0.15); transform: translateY(-2px); border-color: var(--success); }
-        .datos-pago a { text-decoration: none; color: inherit; display: block; padding: 20px 15px; background: #fbfdfc; }
-        .datos-pago a:active { background: #e8f8f5; }
+        .datos-pago .btn-link-bdv { text-decoration: none; color: inherit; display: block; padding: 20px 15px; background: #fbfdfc; cursor: pointer; }
+        .datos-pago .btn-link-bdv:active { background: #e8f8f5; }
         .datos-pago b.pagomovil-link-title { display: block; font-size: 1.35rem; color: var(--success); margin-bottom: 8px; }
         .datos-pago span.pagomovil-data { display: block; font-size: 1rem; color: #555; font-weight: 500; }
         .datos-pago small.pagomovil-cta { display: block; font-size: 0.85rem; color: #888; margin-top: 5px; }
@@ -122,9 +125,13 @@
         <h2 style="text-align:center; color:var(--primary);">Finalizar Pedido</h2>
         <div class="monto-aviso">Bs. <span id="monto-bs-modal">0.00</span><br><small style="font-size:0.8rem">Equivalente a $<span id="monto-usd-modal">0.00</span></small></div>
         
+        <div id="aviso-retorno">
+            <b>💡 ¡No cierres esta pestaña!</b><br>Al pagar en tu banco, regresa aquí para subir el capture y enviar el pedido.
+        </div>
+
         <form id="formulario-pago">
             <div class="opciones-entrega">
-                <label><input type="radio" name="tipo_entrega" id="check-delivery" value="delivery" checked onchange="toggleEntrega()"> 🚚 Incluir Delivery</label>
+                <label><input type="radio" name="tipo_entrega" id="check-delivery" value="delivery" checked onchange="toggleEntrega()"> 🚚 Incluir Delivery (1$)</label>
                 <label><input type="radio" name="tipo_entrega" id="check-retiro" value="retiro" onchange="toggleEntrega()"> 🏪 Retirar en la Tienda</label>
             </div>
 
@@ -133,12 +140,12 @@
             <input type="tel" id="telefono" placeholder="Número de contacto" required>
             <input type="text" id="direccion" placeholder="Dirección de entrega" required>
             
-            <div class="datos-pago">
-                <a href="https://bdvdigital.banvenez.com/pagomovil?id=V19978103&phone=584124645195&bank=0102&description=9dxBliWt4XnVSB0LTqNasQ%3D%3D" target="_blank">
+            <div class="datos-pago" onclick="irAlBanco()">
+                <div class="btn-link-bdv">
                     <b class="pagomovil-link-title">🔗 PAGAR CON Pagomovil BDV</b>
                     <span class="pagomovil-data">0102 04124645195 19978103</span>
                     <small class="pagomovil-cta">Toca aquí para abrir la app</small>
-                </a>
+                </div>
             </div>
 
             <label class="upload-area" id="label-comprobante">
@@ -182,6 +189,13 @@
         const TEL_ID = "712400747";
         const sndAdd = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
         const sndDel = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
+
+        // FUNCIÓN MEJORADA PARA BANCO DE VENEZUELA
+        window.irAlBanco = () => {
+            document.getElementById('aviso-retorno').style.display = 'block';
+            const url = "https://bdvdigital.banvenez.com/pagomovil?id=V19978103&phone=584124645195&bank=0102&description=9dxBliWt4XnVSB0LTqNasQ%3D%3D";
+            window.open(url, '_blank');
+        };
 
         window.toggleCarrito = () => {
             const carritoSec = document.getElementById('carrito-seccion');
@@ -259,7 +273,7 @@
             const ahora = Date.now();
 
             productosCache.forEach(p => {
-                // AJUSTE: DELIVERY AHORA SIEMPRE ES $1.00
+                // AJUSTE: DELIVERY SIEMPRE ES $1.00
                 if (p.nombre === "DELIVERY") { if (p.stock > 0) deliveryActivo = { id: p.id, precio: 1.00 }; return; }
                 
                 let reservasActivas = (p.reservas || []).filter(r => r.expira > ahora);
@@ -298,7 +312,9 @@
                 list.innerHTML += `<div class="item-carrito-mini"><button class="btn-del-item" onclick="quitarItem(${index})">X</button><div style="width: calc(100% - 16px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><b>${item.cantidad}x</b> ${item.nombre}</div><span>$${(item.precio * item.cantidad).toFixed(2)}</span><span style="color:var(--success); font-weight:bold;">Bs.${(item.precio * item.cantidad * tasaActiva).toFixed(2)}</span></div>`;
             });
             let totalUSD = subtotal;
-            if (deliveryActivo && document.getElementById('check-delivery').checked && carrito.length > 0) totalUSD += deliveryActivo.precio;
+            // DELIVERY FIJO A 1$
+            if (document.getElementById('check-delivery').checked && carrito.length > 0) totalUSD += 1.00; 
+            
             document.getElementById('monto-total').innerText = totalUSD.toFixed(2);
             document.getElementById('monto-total-bs').innerText = (totalUSD * tasaActiva).toFixed(2);
             document.getElementById('monto-usd-modal').innerText = totalUSD.toFixed(2);
@@ -399,7 +415,10 @@
             document.getElementById('modal-pago').style.display = 'block'; 
             window.toggleEntrega(); 
         };
-        window.cerrarModal = () => document.getElementById('modal-pago').style.display = 'none';
+        window.cerrarModal = () => {
+            document.getElementById('modal-pago').style.display = 'none';
+            document.getElementById('aviso-retorno').style.display = 'none';
+        };
 
         const comprimirABase64 = (file) => {
             return new Promise((resolve, reject) => {
@@ -454,7 +473,7 @@
             compraConfirmada = true; 
 
             const montoTotalUSD = parseFloat(document.getElementById('monto-usd-modal').innerText);
-            const montoTotalBS = parseFloat(document.getElementById('monto-bs-modal').innerText); // OBTENER BS PARA TELEGRAM
+            const montoTotalBS = parseFloat(document.getElementById('monto-bs-modal').innerText);
             const esDelivery = document.getElementById('check-delivery').checked;
             const tipoEntrega = esDelivery ? "Delivery" : "Retiro en Tienda";
             const dirTexto = esDelivery ? document.getElementById('direccion').value : "Pasa buscando por la Tienda";
@@ -472,15 +491,15 @@
             };
 
             try {
-                if (deliveryActivo && esDelivery) {
-                    resumen.productos.push({ id: deliveryActivo.id, nombre: "DELIVERY", precio: deliveryActivo.precio, cantidad: 1 });
+                // Agregar delivery a la lista de items si aplica
+                if (esDelivery) {
+                    resumen.productos.push({ id: "delivery_item", nombre: "DELIVERY", precio: 1.00, cantidad: 1 });
                 }
 
                 await runTransaction(db, async (transaction) => {
                     const finalItems = [...carrito];
                     const snapshots = [];
                     for (const item of finalItems) {
-                        if (item.nombre === "DELIVERY") continue;
                         const refDoc = doc(db, "productos", item.id);
                         const snap = await transaction.get(refDoc);
                         if (!snap.exists()) throw `El producto ${item.nombre} ya no existe.`;
@@ -512,13 +531,11 @@
                 
                 await fetch(`https://api.telegram.org/bot${TEL_TOKEN}/sendMessage`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ chat_id: TEL_ID, text: msg, parse_mode: 'Markdown' }) });
 
-                if (fileInput.files.length > 0) {
-                    const formData = new FormData();
-                    formData.append('chat_id', TEL_ID);
-                    formData.append('photo', fileInput.files[0]);
-                    formData.append('caption', `Comprobante de: ${resumen.cliente}\nContacto: ${resumen.telefono}`);
-                    await fetch(`https://api.telegram.org/bot${TEL_TOKEN}/sendPhoto`, { method: 'POST', body: formData });
-                }
+                const formData = new FormData();
+                formData.append('chat_id', TEL_ID);
+                formData.append('photo', fileInput.files[0]);
+                formData.append('caption', `Comprobante de: ${resumen.cliente}\nContacto: ${resumen.telefono}`);
+                await fetch(`https://api.telegram.org/bot${TEL_TOKEN}/sendPhoto`, { method: 'POST', body: formData });
 
                 alert("¡Pedido enviado con éxito! ✅");
                 carrito = []; subtotal = 0; cerrarModal(); actualizarUI(); 
